@@ -1,0 +1,182 @@
+﻿@model SalutVaga.Models.NotaFiscal
+
+@{
+    ViewData["Title"] = "Cadastrar";
+}
+
+<style>
+
+    .row {
+        padding: 4px;
+    }
+
+    input {
+        border-radius: 4px;
+    }
+
+    .center {
+        text-align: center;
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+
+    .input-salut {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid gray;
+        border-radius: 4px;
+        background-color: white;
+    }
+
+    .icon {
+        color: white;
+        background-color: #906409;
+        padding: 7px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .icone-label {
+        position: relative;
+        float: right;
+        font-size: 36px;
+        bottom: 8px;
+    }
+
+</style>
+
+
+<div class="container">
+    <p style="display:flex; justify-content:center;">
+        Preencha os campos abaixo para definir seu login e senha. Campos de preenchimento obrigatório:
+    </p>
+    <div class="row">
+        <div class="col-md-3">
+            <input id="DesCnpj" class="form-control DesCnpj" placeholder="CNPJ do Estabelecimento" />
+
+        </div>
+        <div class="col-md-4">
+            <select asp-items="@ViewBag.CanaisCompra" id="CodCanalcompra" class="form-control CodCanalcompra">
+                <option value="">Canal de compra do produto</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" min="2023-05-01" max="2023-06-15" class="form-control dtCompra" id="dtCompra" placeholder="Data da compra" />
+        </div>
+        <div class="col-md-3">
+            <div style="position:relative;">
+                <input class="form-control DesNotafiscal" id="DesNotaFiscal" style="position:absolute; display:inline" placeholder="Numero do cupom fiscal" />
+                <label for="DesNotaFiscal" class="icone-label">
+                    <a href="#" style="color:#906409" class="btn-notafiscalpopup">
+                        <i class="bi bi-question-square-fill"></i>
+                    </a>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-5">
+            <select id="IdProduto" asp-items="@ViewBag.Produtos" class="form-control IdProduto">
+                <option value="">Selecione os produtos que comprou nesta nota</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input id="quantidade" class="form-control Quantidade" placeholder="Quantidade" />
+        </div>
+
+        <div class="col-md-5">
+            <a href="#" id="AdicionarProduto" onclick="produto.salvar()" class="btn btn-success" style="background-color:#906409; border-radius: 20px; width: 100%;">Adicionar produto</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <table class="table center">
+                <thead>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Deletar</th>
+                </thead>
+
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+        <div class="col-md-6">
+            <input type="file" class="DesCaminhoAnexo" id="DesCaminhoAnexo" accept="image/jpeg, image/png, application/pdf" />
+            <label for="DesCaminhoAnexo" class="input-salut">
+                <span id="nomeanexo">
+                    Upload cupom fiscal
+                </span>
+                <span class="icon">
+                    <i class="bi bi-search"></i>
+                </span>
+            </label>
+
+            <div style="color:gray; margin-top:10px;">
+                Verifique se a imagem está legivel e se mostra o cabeçalho e os produtos comprados. Extensões: PDF, JPG, ou JPEG no máximo 2MB.
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <input type="button" value="Enviar" class="btn btn-primary botaoSalvar" style="background-color:#906409; width:100%; border-radius:20px" />
+        </div>
+    </div>
+    <div class="modal fade" id="ModalNFPopUp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div id="conteudoModalNFPopUp"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <link rel="stylesheet" href="~/js/Produto.js" />
+    <link rel="stylesheet" href="~/js/NotaFiscal.js" />
+
+    <script>
+        $(".botaoSalvar").click(function () {
+            var notaFiscal = {
+                DesCnpj: $('.DesCnpj').val(),
+                CodCanalcompra: $('.CodCanalcompra').val(),
+                dtCompra: $('.dtCompra').val(),
+                DesNotafiscal: $('.DesNotafiscal').val(),
+                DesCaminhoAnexo: $('.DesCaminhoAnexo').val()
+            };
+            if (Nf.salvar()) {
+                inserirNota(notaFiscal)
+            }
+
+
+        })
+
+        function inserirNota(notaFiscal) {
+            $.ajax({
+                url: "Formulario/Cadastrar",
+                method: "POST",
+                data: {
+                    notaFiscal: notaFiscal,
+                    produt: produto.arrayProdutos,
+                },
+                success: function (response) {
+                    window.location.href = response.redirectToUrl;
+                },
+                Error: function(){
+                    alert('erro')
+                }
+            });
+        }
+
+
+
+    </script>
+}
